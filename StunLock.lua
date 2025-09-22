@@ -79,13 +79,17 @@ local WS_BY_WEAPON = {
     ["Great Katana"] = {"Tachi: Hobaku"},
 }
 
+local function equipped_item_id(bag, slot)
+    if not bag or not slot or bag == 0 or slot == 0 then return nil end
+    local e = windower.ffxi.get_items(bag, slot)
+    return e and e.id or nil
+end
+
 local function weapon_skill_type()
-    local it = items(); if not it or not it.equipment then return nil end
-    local main, bag = it.equipment.main, it.equipment.main_bag
-    if not main or main == 0 or not bag then return nil end
-    local b = it[bag]; if not b then return nil end
-    local entry = b[main]; if not entry or not entry.id then return nil end
-    local item = res.items[entry.id]; if not item or not item.skill then return nil end
+    local it = windower.ffxi.get_items(); if not it or not it.equipment then return nil end
+    local id = equipped_item_id(it.equipment.main_bag, it.equipment.main)
+    if not id or id == 0 then return nil end
+    local item = res.items[id]; if not item or not item.skill then return nil end
     local skill = res.skills[item.skill]
     return skill and skill.english or nil
 end
@@ -225,4 +229,5 @@ windower.register_event('addon command', function(cmd, arg, arg2)
         if sub == 'off' then set_sws(false); return end
         toggle_sws(); return
     end
+
 end)
